@@ -2,6 +2,10 @@ import requests
 import pickle
 import re
 import os
+import json
+
+
+
 
 from bs4 import BeautifulSoup
 
@@ -15,6 +19,7 @@ def directory_name(text):
         name = name.replace(ch, '_')
     name = name.replace('LTMN_', '')
     name = name.replace('&amp;', 'and')
+    name = name.rstrip('_')
 
     return name
 
@@ -22,7 +27,8 @@ def file_name(text):
     name = TAG_RE.sub('', str(text))
     for ch in [',', '\'', ' ']:
         name = name.replace(ch, '_')
-    name = name.replace('Long-term_monitoring_network_vegetation_', '')
+    name = name.replace('Long-term_monitoring_network_', '')
+    name = name.replace('Long_term_monitoring_network_', '')
     name = name.replace('&amp;', 'and')
 
     return name
@@ -38,7 +44,12 @@ soup = BeautifulSoup(html_doc)
 
 file_ad_list = []
 data_dir = './Data/'
-os.mkdir(data_dir)
+try:
+    os.mkdir(data_dir)
+    os.mkdir(data_dir + 'Vegetation/')
+    os.mkdir(data_dir + 'Butterfly/')
+except:
+    pass
 
 # Find all 'a' tags (which define hyperlinks)
 a_tags = soup.find_all('a')
@@ -50,7 +61,7 @@ for link in a_tags:
         site_soup = BeautifulSoup(site_html)
 
         dir_name = data_dir + directory_name(str(site_soup.title))
-        os.mkdir(dir_name)
+        #os.mkdir(dir_name)
         print('\n', dir_name, '\n')
 
         a_tags_site = site_soup.find_all('a')
@@ -60,12 +71,23 @@ for link in a_tags:
                 file_link = domain + file_search
                 my_file = requests.get(file_link)
 
-                f_name = dir_name + '/' + file_name(site_link) + '.xlsx'
-                print(file_name(site_link))
-                open(f_name, 'wb').write(my_file.content)
-                file_ad_list.append(f_name)
+                if 'Metadata' in file_name(site_link):
+                    pass
+                elif 'vegetation' in file_name(site_link):
+                    f_name = './Data/Vegetation/' + file_name(site_link) + '.xlsx'
+                    print(file_name(site_link))
+                    open(f_name, 'wb').write(my_file.content)
+                    file_ad_list.append(f_name)
+                elif 'butterfly' in file_name(site_link):
+                    f_name = './Data/Butterfly/' + file_name(site_link) + '.xlsx'
+                    print(file_name(site_link))
+                    open(f_name, 'wb').write(my_file.content)
+                    file_ad_list.append(f_name)
+                else:
+                    print(file_name(site_link) + ' - not saved')
 
-with open(data_dir + "/file_list", "wb") as fp:
-    pickle.dump(file_ad_list, fp)
+with open(data_dir + "file_list.json", 'w') as f:
+    json.dump(file_ad_list, f)
+
 
 
