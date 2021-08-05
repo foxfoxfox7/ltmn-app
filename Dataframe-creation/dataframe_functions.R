@@ -6,12 +6,51 @@ library(stringdist)
 
 setwd('C:/Users/kiera/Projects/ltmn-app/Dataframe-creation/')
 
-
 ################################################################################
 #
 #                   Importing data
 #
 ################################################################################
+
+site_names <- list(
+  B01	=	"Ainsdale",
+  B02	=	"Bure Marshes",
+  B03	=	"Burnham Beeches",
+  B09	=	"Derbyshire Dales",
+  B10	=	"Fenns, Whixall and Bettisfield Mosses",
+  B11	=	"Finglandrigg Woods",
+  B12	=	"Ingleborough",
+  B13	=	"Lindisfarne",
+  B14	=	"Lullington Heath",
+  B15	=	"Martin Down",
+  B16	=	"Monks Wood",
+  B18	=	"North Solent",
+  B20	=	"Old Winchester Hill",
+  B25	=	"Stiperstones",
+  B26	=	"Thursley",
+  B29	=	"East Dartmoor Woods & Heaths",
+  B30	=	"Chippenham Fen",
+  B31	=	"Chobham Common",
+  B32	=	"Dersingham Bog",
+  B33	=	"Downton Gorge",
+  B34	=	"Epping Forest",
+  B35	=	"Kielderhead",
+  B36	=	"Lower Derwent Valley",
+  B37	=	"Ludham-Potter Heigham",
+  B38	=	"Malham Tarn",
+  B39	=	"Saltfleetby-Theddlethorpe Dunes",
+  B40	=	"The Lizard",
+  B41	=	"Dark Peak",
+  B42	=	"North Walney",
+  B43	=	"Mottey Meadows",
+  B44	=	"Wyre Forest ",
+  B45	=	"Woodwalton Fen",
+  B46	=	"Braunton Burrows",
+  B47	=	"Ennerdale & Scoat Fell",
+  B48	=	"May Moss",
+  B49	=	"Roudsea Wood and Mosses",
+  B50	=	"Cross Fell"
+)
 
 get_names <- function(file_name) {
   # Renaming some of the habitat names as they are too far off and wont be found
@@ -60,7 +99,7 @@ get_whole_plot_data <- function(file_name) {
   
   # These are the columns we want from wpd
   wpd_data_cols <- c('PLOT_ID', 'SITECODE', 'YEAR', 'SDATE', 'EASTINGS' , 
-                     'NORTHINGS', 'LIGHT', 'WETNESS', 'PH', 'FERTILITY',
+                     'NORTHINGS', 'BNG_GRID_REF', 'LIGHT', 'WETNESS', 'PH', 'FERTILITY',
                      'COMPETITION', 'STRESS', 'RUDERALS',
                      'BAP_BROAD', 'BAP_PRIORITY', 'NVC_FIRST')
   
@@ -77,7 +116,7 @@ get_whole_plot_data <- function(file_name) {
   wpd_data$PLOT_ID <- sub('a$', '', wpd_data$PLOT_ID)
   
   colnames(wpd_data) <-c('plot_id', 'sitecode', 'year', 'date', 'eastings',
-                         'northings', 'light', 'wetness', 'aciditiy', 
+                         'northings', 'bng_grid', 'light', 'wetness', 'aciditiy', 
                          'fertility', 'competition', 'stress', 'ruderals', 
                          'broad_hab', 'priority_hab', 'nvc_result')
   
