@@ -4,8 +4,6 @@ library(sp)
 library(rgdal)
 library(stringdist)
 
-setwd('C:/Users/kiera/Projects/ltmn-app/Dataframe-creation/')
-
 ################################################################################
 #
 #                   Importing data
@@ -91,6 +89,7 @@ get_base <- function(file_name){
     dplyr::select(contains(base_cols))
   
   base_df$PLOT_ID <- as.character(base_df$PLOT_ID)
+  base_df$PLOT_ID <- sub('a$', '', base_df$PLOT_ID)
   
   return(base_df)
 }
@@ -290,10 +289,11 @@ get_ground_features <- function(file_name, base_df){
     full_join(., frequency_gf, by = "PLOT_ID")
   
   final_keep <- c('PLOT_ID', 'SITECODE', 'YEAR', 'MEAN_HEIGHT', 'STD_HEIGHT',
-                  'litter', 'bare_x', 'test')
+                  'litter', 'bare_x')
   
   base_df <- base_df %>%
-    dplyr::select(contains(final_keep))
+    dplyr::select(contains(final_keep)) %>%
+    dplyr::select(-contains('leaf'))
   
   colnames(base_df)[1:5] <- c('plot_id', 'sitecode', 'year', 'veg_height',
                               'veg_height_std')
@@ -416,6 +416,31 @@ EastNorth_to_LongLat <- function(df) {
   
   df_plot <- full_join(df_full, df_plot,
                        by = c("plot_id", "sitecode", "year", "eastings", "northings"))
+  
+  return(df_plot)
+}
+
+gridref_to_lat_long <- function(df) {
+  
+  coord_cols <- c('plot_id', 'sitecode', 'year', 'bng_grid')
+  
+  # df_full is not touched and has all the original plots
+  df_full <- df %>%
+    dplyr::select(contains(coord_cols))
+  # need to get rid of NA vals so the new coords can be put back into a df 
+  df_plot <- df_full[!is.na(df_full$bng_grid), ]
+
+  # converting bng grid ref. the converst from north/east seem to be out
+  # by a little bit
+  coord <- list(lon = NA, lat = NA)
+  coord <- osg_parse(df_plot$bng_grid, coord_system = 'WGS84')
+  
+  # lon lat are the defualt names from osg_parse
+  df_plot$longitude <- coord[['lon']]
+  df_plot$latitude <- coord[['lat']]
+
+  df_plot <- full_join(df_full, df_plot,
+                       by = c("plot_id", "sitecode", "year", "bng_grid"))
   
   return(df_plot)
 }

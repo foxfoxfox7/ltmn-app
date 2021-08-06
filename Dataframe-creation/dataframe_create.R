@@ -5,11 +5,13 @@ library(matrixStats)
 library(diverse)
 library(openxlsx)
 library(rjson)
+library(rnrfa)
 
 
 
 # change this to your working direstory (the directory with the code in)
-setwd('C:/Users/kiera/Projects/ltmn-app/Dataframe-creation/')
+setwd('C:/Users/Kieran.Fox/Work/ltmn-app/Dataframe-creation/')
+#setwd('C:/Users/kiera/Projects/ltmn-app/Dataframe-creation/')
 source('./dataframe_functions.R')
 
 ################################################################################
@@ -36,8 +38,8 @@ name_swap <- read.csv(paste0(import, 'species_rename.csv'))
 freq_list = list()
 pcover_list = list()
 plot_data_list = list()
-#for (ii in 1:length(list_of_files)) {
-for (ii in 1:6) {
+for (ii in 1:length(list_of_files)) {
+#for (ii in 1:2) {
   
   print(list_of_files[ii])
   file_name <- paste(data, list_of_files[ii], sep='')
@@ -66,6 +68,7 @@ for (ii in 1:6) {
   div_rich <- get_diversity_richness(frequency)
   mavis <- nvc_divide(wpd_data)
   #coords <- EastNorth_to_LongLat(wpd_data)
+  coords <- gridref_to_lat_long(wpd_data)
   
   ##############################################################################
   # making corrections to the dfs
@@ -74,7 +77,7 @@ for (ii in 1:6) {
   wpd_whole <- wpd_data %>%
     full_join(., mavis, by = c("plot_id", "sitecode", "year", "nvc_result")) %>%
     full_join(., div_rich, by = "plot_id") %>%
-    #full_join(., coords, by = c("plot_id", "sitecode", "year", "eastings", "northings")) %>%
+    full_join(., coords, by = c("plot_id", "sitecode", "year", "bng_grid")) %>%
     full_join(., gf_df, by = c("plot_id", "sitecode", "year"))
     
   wpd_whole <- fix_habitat_names(wpd_whole, habitat_list_holder)
