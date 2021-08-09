@@ -1,15 +1,16 @@
-setwd('C:/Users/kiera/Projects/ltmn-app/app/')
-
 ui <- fluidPage(
   
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "www/bootstrap.css")
-  ),
+  #tags$head(
+    #tags$link(rel = "stylesheet", type = "text/css", href = "www/bootstrap.css")
+  #),
   
   #theme = "bootstrap.css",
   #theme = "bootstrap.css",
   #includeCSS("bootstrap.css"),
-  headerPanel("Long-Term Monitong Network feature map"),
+  
+  tags$style("h1 { color: red;}"),
+  h1("Hello World"),
+  #headerPanel("Long-Term Monitong Network feature map"),
   
 
     
@@ -28,6 +29,4 @@ ui <- fluidPage(
       leafletOutput("coolplot")
     )
   )
-  
-  
 )
