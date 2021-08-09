@@ -7,7 +7,7 @@ library(leaflet)
 library(mapview)
 library(colorspace)
 library(RColorBrewer)
-
+library(tidyverse)
 #library(raster)
 library(sp)
 library(rgdal)
@@ -35,8 +35,14 @@ df_total$lon = coord[['lon']]
 df_total$lat = coord[['lat']]
 
 
+map_broke <- c("Braunton Burrows", "Lullington Heath", "Martin Down", 
+               "North Solent", "Roudsea Wood and Mosses", 
+               "Saltfleetby-Theddlethorpe Dunes", "Woodwalton Fen",
+               "Wyre Forest ")
 
-
+df_total <- df_total[!(df_total$sitecode %in% map_broke), ]
+write.csv(df_total, './dataframe-creation/main_data/plot_data_sample2.csv',
+          row.names = FALSE)
 
 
 
