@@ -6,7 +6,6 @@ ui <- dashboardPage(
   #  tags$link(rel = "stylesheet", type = "text/css", href = "www/bootstrap.css")
   #),
   
-  
   dashboardHeader(title="Long-Term Monitong Network feature map"),
   
   dashboardSidebar(
@@ -25,5 +24,6 @@ ui <- dashboardPage(
   dashboardBody(
     leafletOutput("coolplot", height = 700)
     )
-  
-)
+
+  )
+
