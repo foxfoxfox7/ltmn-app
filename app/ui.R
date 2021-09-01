@@ -1,33 +1,29 @@
 setwd('C:/Users/kiera/Projects/ltmn-app/app/')
 
-ui <- fluidPage(
+ui <- dashboardPage(
   
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "www/bootstrap.css")
-  ),
+  #tags$head(
+  #  tags$link(rel = "stylesheet", type = "text/css", href = "www/bootstrap.css")
+  #),
   
-  #theme = "bootstrap.css",
-  #theme = "bootstrap.css",
-  #includeCSS("bootstrap.css"),
-  headerPanel("Long-Term Monitong Network feature map"),
   
-
+  dashboardHeader(title="Long-Term Monitong Network feature map"),
+  
+  dashboardSidebar(
     
-    # dashboardHeader(),
-    # dashboardSidebar(uiOutput("site_output"),
-    #                  uiOutput("feature_output")),
-    # dashboardBody(leafletOutput('coolplot'))
+    uiOutput("site_output"),
     
-    
-  sidebarLayout(
-    sidebarPanel(
-      uiOutput("site_output"),
-      uiOutput("feature_output")
+    sidebarMenu(id = "tab", 
+                menuItem("Single year feature", tabName = "1"),
+                menuItem("Plant species", tabName = "2")
     ),
-    mainPanel(
-      leafletOutput("coolplot")
+    
+    
+    uiOutput("feature_output"),
+    uiOutput("habitat_output")),
+    
+  dashboardBody(
+    leafletOutput("coolplot", height = 700)
     )
-  )
-  
   
 )

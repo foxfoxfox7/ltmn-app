@@ -6,38 +6,83 @@ df_total <- read.csv('./www/Data/plot_data_sample2.csv')
 server <- function(input, output) {
   
   #########################
-  # Inputs
+  # Selecting the site and pairing down the datafame
   
   output$site_output <- renderUI({
-    selectInput("site_input", "Site",
+    selectInput("site_input", 
+                "Site",
                 sort(unique(df_total$sitecode)),
                 selected = 'Lullington Heath')
   })
   
+  site_df <- reactive({
+    
+    if (is.null(input$site_input)) {
+      return()
+    }
+    
+    df_total[df_total$sitecode == input$site_input, ]
+  })
+  
+  
+  
+  #########################
+  # Selecting the extra input information depending on the tab
+  
+  
+  # output$feature_output <- renderUI({
+  #   
+  #   if (input$tab == "1") {
+  #     selectInput("feature_input", 
+  #                 "Feature",
+  #                 feat_of_int,
+  #                 feat_of_int[1])
+  #   } else {
+  #     return(NULL)
+  #   }
+  #     
+  # })
+  # 
+  # output$habitat_output <- renderUI({
+  #   
+  #   if (input$tab == "2") {
+  #     selectInput("Habitat_input", 
+  #                 "Habitat",
+  #                 sort(unique(site_df()$broad_hab)),
+  #                 multiple = TRUE)
+  #   } else {
+  #     return(NULL)
+  #   }
+  #   
+  # })
+  
+  
   output$feature_output <- renderUI({
-    selectInput("feature_input", "Feature",
+    
+    if (input$tab != "1") {
+      return(NULL)
+    } 
+
+    selectInput("feature_input", 
+                "Feature",
                 feat_of_int,
                 feat_of_int[1])
   })
   
-  
-
-  
-  #########################
-  # creating the filterred df
-  
-  site_df <- reactive({
-    df_total[df_total$sitecode == input$site_input, ]
-    #df_total %>%
-    #  filter(sitecode == input$site_input)
+  output$habitat_output <- renderUI({
+    
+    if (input$tab != "2") {
+      return(NULL)
+    }
+    
+    selectInput("habitat_input", 
+                "Habitat",
+                sort(unique(site_df()$broad_hab)),
+                multiple = TRUE)
+    
   })
 
-  site_feat_df <- reactive({
-    site_df()[!is.na(site_df()[ ,input$feature_input]),]
-  })
-
-
-
+  
 
 
   
@@ -46,146 +91,88 @@ server <- function(input, output) {
 
   output$coolplot <- renderLeaflet({
     
-    if (is.null(site_feat_df())) {
+    if (is.null(site_df())) {
       return()
     }
-
-    feature = input$feature_input
-    df <- site_feat_df()
-
-    east_cent <- get_centre_coords(df)[[1]]
-    north_cent <- get_centre_coords(df)[[2]]
-
-    # make palette
-    domain <- range(df[ ,feature])
-
-    pal <- colorNumeric(palette = c('white', 'red'), domain = domain)
-    # making the reverse pallette for the legend
-    pal_rev <- colorNumeric(palette = c('white', 'red'), domain = domain, reverse = TRUE)
     
-    print(pal(0.5))
+    if (input$tab == "1") {
+      #FIXME
+      feature = input$feature_input
+      
+      df <- site_df()[!is.na(site_df()[ ,input$feature_input]),]
 
-    leaflet(df) %>%
-      addTiles() %>%
-      setView(lng=east_cent, lat=north_cent, zoom = 14) %>%
-      addCircleMarkers(lng = ~longitude, lat = ~latitude,
-                       color = ~pal(df[[feature]]),
-                       #label=~year,
-                       stroke = FALSE, fillOpacity = 0.5) %>%
-      addLegend(pal = pal_rev, values = ~df[[feature]],
-                title = feature,
-                labFormat = labelFormat(transform =
-                                          function(x) sort(x, decreasing = TRUE)))
+      east_cent <- get_centre_coords(df)[[1]]
+      north_cent <- get_centre_coords(df)[[2]]
+      
+      # make palette
+      domain <- range(df[ ,feature])
+      
+      pal <- colorNumeric(palette = c('white', 'red'), domain = domain)
+      # making the reverse pallette for the legend
+      pal_rev <- colorNumeric(palette = c('white', 'red'), domain = domain, reverse = TRUE)
+      
+      leaflet(df) %>%
+        addTiles() %>%
+        setView(lng=east_cent, lat=north_cent, zoom = 14) %>%
+        addCircleMarkers(lng = ~longitude, lat = ~latitude,
+                         color = ~pal(df[[feature]]),
+                         #label=~year,
+                         stroke = FALSE, fillOpacity = 0.5) %>%
+        addLegend(pal = pal_rev, values = ~df[[feature]],
+                  title = feature,
+                  labFormat = labelFormat(transform =
+                                            function(x) sort(x, decreasing = TRUE)))
+      
+    } else if (input$tab == "2") {
+      
+      
+      east_cent <- get_centre_coords(site_df())[[1]]
+      north_cent <- get_centre_coords(site_df())[[2]]
+      
+      df <- site_df()[!is.na(site_df()[ ,input$feature_input]),] %>%
+        filter(broad_hab %in% input$habitat_input)
+      
+      if (dim(df)[0] == 0) {
+        leaflet(df) %>%
+          addTiles() %>%
+          setView(lng=east_cent, lat=north_cent, zoom = 14)
+      } else {
+        # make palette
+        domain <- range(df[ ,feature])
+        
+        pal <- colorNumeric(palette = c('white', 'blue'), domain = domain)
+        # making the reverse pallette for the legend
+        pal_rev <- colorNumeric(palette = c('white', 'blue'), domain = domain, reverse = TRUE)
+        
+        leaflet(df) %>%
+          addTiles() %>%
+          setView(lng=east_cent, lat=north_cent, zoom = 14) %>%
+          addCircleMarkers(lng = ~longitude, lat = ~latitude,
+                           color = ~pal(df[[feature]]),
+                           #label=~year,
+                           stroke = FALSE, fillOpacity = 0.5) %>%
+          addLegend(pal = pal_rev, values = ~df[[feature]],
+                    title = feature,
+                    labFormat = labelFormat(transform =
+                                              function(x) sort(x, decreasing = TRUE)))
+      }
+      
+    }
+      
+      
 
-
+      
+      
+    
   })
-  
-  # output$coolplot <- renderLeaflet({
-  #   
-  #   #features = input$feature_input
-  #   features = c('species_richness', 'species_diversity')
-  #   df <- site_feat_df()
-  #   
-  #   east_cent <- get_centre_coords(df)[[1]]
-  #   north_cent <- get_centre_coords(df)[[2]]
-  #   
-  #   df$unique_id2 <- as.character(1:length(df$Plot_ID)) %>%
-  #     str_pad(., width = 25, side = 'right', pad = 'z')
-  #   
-  #   list_of_years <- unique(df$Year)
-  #   
-  #   m <- leaflet(df) %>%
-  #     addTiles() %>%
-  #     setView(lng=east_cent, lat=north_cent, zoom = 14)
-  #   
-  #   for (jj in 1:length(features)) {
-  #     
-  #     domain <- range(df[[features[jj]]])
-  #     pal <- colorNumeric(palette = "reds", domain = domain)
-  #     
-  #     m <- addCircleMarkers(
-  #       map = m,
-  #       lat=~latitude, 
-  #       lng=~longitude, 
-  #       color = pal(df[[features[jj]]]),
-  #       stroke = FALSE, fillOpacity = 1,
-  #       group=~year, 
-  #       #label=~BAP_broad, 
-  #       layerId = ~paste(unique_id2, features[jj], sep="")) %>%
-  #       addLegend(pal = pal,
-  #                 values = df[[features[jj]]],
-  #                 title = features[jj],
-  #                 position = 'bottomleft',
-  #                 group = features[jj])
-  #     
-  #   }
-  #   
-  #   widget_text <- sprintf("
-  #   function(el, x) {
-  #     var myMap = this;
-  #     var baseLayer = '%s';
-  #     myMap.eachLayer(function(layer){
-  #       var id = layer.options.layerId;
-  #       if (id){
-  #         if ('%s' !== id.substring(25,)){
-  #           layer.getElement().style.display = 'none';
-  #         }
-  #       }
-  #     })
-  #     console.log(myMap.baselayer);
-  #     myMap.on('baselayerchange',
-  #       function (e) {
-  #         baseLayer=e.name;
-  #         myMap.eachLayer(function (layer) {
-  #             var id = layer.options.layerId;
-  #             if (id){
-  #               if (e.name !== id.substring(25,)){
-  #                 layer.getElement().style.display = 'none';
-  #                 layer.closePopup();
-  #               }
-  #               if (e.name === id.substring(25,)){
-  #                 layer.getElement().style.display = 'block';
-  #               }
-  #             }
-  # 
-  #         });
-  #       })
-  #       myMap.on('overlayadd', function(e){
-  #         myMap.eachLayer(function(layer){
-  #           var id = layer.options.layerId;
-  #           if (id){
-  #               if (baseLayer !== id.substring(25,)){
-  #                 layer.getElement().style.display = 'none';
-  #               }
-  #           }
-  #         })
-  #       })
-  #   }", features[1], features[1])
-  #   
-  #   m <- addLayersControl(map = m,
-  #                         baseGroups = features,
-  #                         overlayGroups = list_of_years,
-  #                         options = layersControlOptions(collapsed = F)) %>%
-  #     htmlwidgets::onRender(widget_text) %>%
-  #     htmlwidgets::onRender("
-  #   function(el, x) {
-  #     var updateLegend = function () {
-  #         var selectedGroup = document.querySelectorAll('input:checked')[0].nextSibling.innerText.substr(1);
-  # 
-  #         document.querySelectorAll('.legend').forEach(a => a.hidden=true);
-  #         document.querySelectorAll('.legend').forEach(l => {
-  #           if (l.children[0].children[0].innerText == selectedGroup) l.hidden=false;
-  #         });
-  #     };
-  #     updateLegend();
-  #     this.on('baselayerchange', e => updateLegend());
-  #   }")
-  #   m
-  #   
-  #   
-  # })
-  
 
+    
+
+
+    
+  
+  
+  
   
 }
 

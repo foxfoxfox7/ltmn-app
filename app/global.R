@@ -28,7 +28,6 @@ get_centre_coords <- function(df) {
   return(list(east_cent, north_cent))
 }
 
-
 feat_of_int <- c('light', 'wetness', 'acidity', 'fertility', 'competition', 
                  'stress', 'ruderals', 'species_richness', 'species_diversity', 
                  'veg_height', 'veg_height_std', 'litter', 'bare_x')
