@@ -14,10 +14,10 @@ library(rgdal)
 
 library(rnrfa)
 
-#setwd('C:/Users/kiera/Projects/ltmn-app/')
-setwd('C:/Users/Kieran.Fox/Work/ltmn-app')
+setwd('C:/Users/kiera/Projects/ltmn-app/')
+#setwd('C:/Users/Kieran.Fox/Work/ltmn-app')
 
-df_total <- read.csv('./dataframe-creation/main_data/plot_data_sample.csv')# %>%
+df_total <- read.csv('./dataframe-creation/main_data/plot_data_sample2.csv')# %>%
   #dplyr::select(-c('longitude', 'latitude'))
 
 df_total <- df_total %>%
